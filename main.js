@@ -13,9 +13,9 @@ if (typeof web3 !== 'undefined') {
     console.log(web3.currentProvider)
 }
 
-let sendingAddress = "0xC2C8bCdff0DfcBa1137d2C2849c7ea5A7934544e";
+let sendingAddress = "0xFd9AFDB4cAc6AAF8CDD0b43b5920ff75E2f4b34b";
 
-let transactionCount = 2 //web3.eth.getTransactionCount(sendingAddress).then(console.log)
+let transactionCount = 15 //web3.eth.getTransactionCount(sendingAddress).then(console.log)
 let contractAddress = "0xf0750c65582b306c42aafb01fafbed9bf3f583ed";
 const Tx = require('ethereumjs-tx');
 
@@ -33,19 +33,28 @@ IPFS.on('ready', () => {
 
     if(res[0].hash !== undefined) {
         console.log('here')
-        let privateKey = new Buffer('b9d000d8dd06b8e2f863b428a191ed25c5ce8dba6b1f3ed972ab370dc5150ddf', 'hex');
+        let privateKey = new Buffer('e276895231e789fc17420d3aa933ddcf976372bbc2f6b653f759e09b2cb9cbae', 'hex');
 
         let abiArray = JSON.parse(fs.readFileSync("abiFile.json", 'utf-8'));
-        let contract = web3.eth.contract(abiArray).at(contractAddress);
+        let contract = new web3.eth.Contract(abiArray, contractAddress);
+
+    //     contract.methods.addComodity("testNameWeb3", "testHashweb3")
+    //     .send({from: sendingAddress,gasPrice: "0x4E3B29200", gas: 80000, value: "0x0" })
+    //     .then(function(receipt){
+    //         console.log(receipt);
+    // // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
+    //     });
+
+    
         let rawTransaction = {
             "from": sendingAddress,
-            "nonce": web3.toHex(transactionCount + 2),
-            "gasPrice": web3.toHex(21000000000),
-            "gasLimit": web3.toHex(80000),
-            "to": contractAddress,
-            "value": "0x0",
-            "data": contract.addComodity.getData("testName", "testHash", {from: sendingAddress}),
-            "chainId": 0x03
+             "nonce": "0x1",
+             "gasPrice": web3.utils.numberToHex(web3.utils.toWei('4','gwei')),
+             "gasLimit": web3.utils.numberToHex('95000'),
+             "to": contractAddress,
+             "value": "0x0",
+             "data": contract.methods.addComodity("testNameWeb3", "testHashweb3").encodeABI(),
+             "chainId": "0x03"
         };
         ++transactionCount;
         let tx = new Tx(rawTransaction);
@@ -58,16 +67,9 @@ IPFS.on('ready', () => {
 
 
 
-        web3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'), function(err, hash) {
-            if (!err) {
-                console.log(hash);
-
-            } else {
-                console.log(err);
-
-            }
-
-        });
+      web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', console.log).catch( (e) => {
+          console.log(e)
+      })
 
 
     }

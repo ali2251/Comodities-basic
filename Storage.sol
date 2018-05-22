@@ -1,7 +1,7 @@
 contract Storage {
     
     mapping(string => string) comodities;
-    mapping(string => string) loans;
+    mapping(string => strin) loans;
     
     function Storage() {
         
